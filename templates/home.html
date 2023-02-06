@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>Upload File</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Upload File Anda</h1>
+	  <form method=post enctype=multipart/form-data>
+	  <input type=file name=file class=file-input>
+	  <input type=submit class="upload-btn" value=Upload>
+    </div>
+  </body>
+	<style>
+      /* Style for the page container */
+      body {
+        background-color: #fff;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .container {
+        width: 500px;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px #ccc;
+        padding: 20px;
+        text-align: center;
+      }
+
+      /* Style for the title text */
+      h1 {
+        font-family: sans-serif;
+        color: #333;
+        margin-top: 50px;
+      }
+
+      /* Style for the file input field */
+      .file-input {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 2px solid #ccc;
+        margin-top: 20px;
+        box-sizing: border-box;
+      }
+
+      /* Style for the upload button */
+      .upload-btn {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        background-color: #00BFFF;
+        color: #fff;
+        border-style: none;
+        border-radius: 5px;
+        margin-top: 20px;
+        cursor: pointer;
+      }
+    </style>
+</html>
