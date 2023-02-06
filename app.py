@@ -1,33 +1,33 @@
-# Importing flask module in the project is mandatory
-# An object of Flask class is our WSGI application.
-from flask import Flask, render_template, request
+#import library yang dibutuhkan
 import os
-from flask import Flask, flash, request, redirect, url_for
-from werkzeug.utils import secure_filename
-from flask import send_from_directory
 import processing as pr
+from werkzeug.utils import secure_filename
+from flask import Flask, render_template, flash, request, redirect, url_for, send_from_directory
 
+#deklarasi lokasi upload file dan format file yang diperbolehkan
 cwd = os.getcwd()
-UPLOAD_FOLDER = f"{cwd}/upload" #path file tempat upload
+UPLOAD_FOLDER = f"{cwd}/upload"
 ALLOWED_EXTENSIONS = {'xlsx', 'csv'}
 
+#deklarasi aplikasi web menggunakan flask
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+#fungsi untuk memberikan aturan file yang diperbolehkan
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+#fungsi utama (routing) menggunakan flask
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
-        # check if the post request has the file part
+        #cek jika POST memiliki part-part file yang telah di upload
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
         file = request.files['file']
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
+        #jika user tidak memilih file, maka browser akan submit file dengan nama kosong
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
@@ -36,7 +36,8 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('download_file', name=filename, sheet_numb=1))
     return render_template('home.html')
-    
+
+#routing flask setelah proses upload untuk dilakukan proses natural language processing
 @app.route('/process/<name>/<sheet_numb>')
 def download_file(name, sheet_numb):
     filepath = "upload/" + name

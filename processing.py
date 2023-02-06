@@ -1,62 +1,69 @@
+#import library yang dibutuhkan
 import numpy as np
 import pandas as pd
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from wordcloud import WordCloud
-import networkx as nx
-from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 import os
+import matplotlib
+import matplotlib.pyplot as plt
+import networkx as nx
+from wordcloud import WordCloud
+from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
+matplotlib.use('Agg')
 
+#deklarasi lokasi save gambar
 cwd = os.getcwd()
 img_savepath = f"{cwd}\static\img"
 
+#deklarasi fungsi utama
 def main(filename):
   global excel, data, question
   excel = pd.ExcelFile(filename)
   data = pd.read_excel(excel, sheet_name=None)
 
-  #Worksheet name extraction
+  #mengambil nama worksheet
   list_sheet = {}
   i = 1
   for sheet_name in excel.sheet_names:
       list_sheet[str(i)] = sheet_name
       i += 1
 
-  #Extracting question
+  #mengambil pertanyaan
   question1 = [list(data[i]) for i in excel.sheet_names]
   question = [question1[i][0] for i in range(len(question1))]
 
   return sorted(list_sheet.items(), key=lambda item: item[0])
 
+#deklarasi fungsi mengambil nomor worksheet
 def sheet_num(sheet_numb):
   global sheet_number
   sheet_number = sheet_numb
 
   return sheet_number, excel.sheet_names[sheet_number - 1], question[sheet_number - 1]
 
+#deklarasi fungsi menghapus stopword
 def stopword():
   global stopwords_result
   text = list(data[excel.sheet_names[sheet_number - 1]][question[sheet_number - 1]])
-  #lowercase and removing punctuation
+
+  #membuat kata menjadi lowercase dan menghapus tanda baca
   new_string = [text[i].translate(str.maketrans(' ', ' ', '1234567890!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n')).lower() for i in range(len(text))]
 
-  # create stop words removal
+  #menghapus stopword
   factory = StopWordRemoverFactory()
   stopwords = factory.create_stop_word_remover()
   stopwords_result = []
 
-  # stop words removal process
   for item in new_string:
       output = stopwords.remove(item)
       stopwords_result.append(output)
 
+#deklarasi fungsi pembuatan WordCloud
 def wordcloud():
   word_cloud = WordCloud(max_words = 50, width = 1920, height = 1080, background_color = 'white').generate(' '.join(stopwords_result))
   plt.imshow(word_cloud, interpolation='bilinear')
   plt.axis("off")
   plt.savefig(img_savepath + "\wordcloud.jpg")
 
+#deklarasi fungsi penghitungan frekuensi kata yang sering muncul
 def freq():
   global most_occur
   from collections import Counter
@@ -71,6 +78,7 @@ def freq():
 
   return sorted(list_occur.items(), reverse=True, key=lambda item: item[1])
 
+#deklarasi fungsi penghitungan frekuensi kata yang sering muncul
 def avg():
   avg = []
   for i in stopwords_result:
@@ -81,16 +89,18 @@ def avg():
 
   return avg_words_per_sentence, total_word
 
+#deklarasi fungsi ngram
 def ngrams(ngram=2):
   global n_grams
   n_grams = []
   for i in range(len(stopwords_result)):
     converted = [i for i in stopwords_result[i].split()]
-    words = converted
+    words = converted #note
     temp=zip(*[words[i:] for i in range(0,ngram)])
     ans=[' '.join(ngram) for ngram in temp]
     n_grams.append(ans)
 
+#deklarasi fungsi network graph
 def network(top=3):
   aarr=[]
   for i in range(len(n_grams)):
@@ -112,15 +122,14 @@ def network(top=3):
     arr1.append(p[0])
     arr2.append(p[1])
 
-  # Build a dataframe with your connections
+  #membuat dataframe berdasarkan ngram
   df = pd.DataFrame({ 'from':arr1, 'to':arr2})
   
-  # Build your graph
+  #membangun graph
   G=nx.from_pandas_edgelist(df, 'from', 'to')
 
   plt.figure(figsize=(16,8))
 
-  # Chart with Custom edges:
   nx.draw_networkx(G, with_labels=True, node_size=1000, node_color="skyblue", node_shape="h", alpha=0.6, linewidths=5, font_size=8, 
           font_color="black", font_weight="normal", width=1, edge_color="grey", pos = nx.spring_layout(G, k=0.6, iterations=100))
   plt.savefig(img_savepath + "\\network.jpg")
